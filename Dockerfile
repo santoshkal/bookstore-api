@@ -1,4 +1,4 @@
-FROM wolfi-base AS build
+FROM cgr.dev/chainguard/wolfi-base AS build
 
 RUN apk update && apk add go
 
