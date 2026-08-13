@@ -53,11 +53,11 @@ jobs:
       - name: Publish Flux OCI artifact to GHCR
         id: Push_Artifact
         run: |
-          flux push artifact oci://ghcr.io/santoshkal/manifests/bookstore:${{ steps.prep.outputs.VERSION }} \
+          flux push artifact oci://ghcr.io/santoshkal/manifests/bookstore:${COMMIT_SHA} \
             --path="./kustomize" \
             --source="${{ github.event.repository.html_url }}" \
-            --revision="${GITHUB_REF_NAME}/${GITHUB_SHA}"
-          flux tag artifact oci://ghcr.io/santoshkal/manifests/bookstore:${{ steps.prep.outputs.VERSION }} --tag latest
+            --revision="${GITHUB_REF_NAME}@sha1:${GITHUB_SHA}"
+          flux tag artifact oci://ghcr.io/santoshkal/manifests/bookstore:${COMMIT_SHA} --tag latest
       - name: Image digest
         run: echo $COMMIT_SHA
     # - name: Metadata
