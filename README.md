@@ -1,8 +1,22 @@
 # Bookstore-api
 
-This is my **WIP** DevOps project containing a simple REST API built with Go and a Postgres database bot deployed on a Kubernetes Kind test cluster. It also containes a frontend built with Go templates giving access to the bookstore database stored inthe Postgres db.
+A **WIP** DevOps project: a simple REST API built with Go, a frontend rendered with Go templates, and a Postgres database, all deployed to a Kubernetes Kind test cluster.
 
-The frontend and the backend of the application with all its dependencies are deployed on a namespace called `frontend-api` and the database with its dependencies and envVars are deployed in a different namespace namely `database`. The service can accessed through Nodeport i.e `<node IP>:<service port>/books` or using a the `ingress`. Currently, the `ingress` object is mapped to `app.santoshdts` as host. Do not forget to map the host of your choice and if its a test domain to `/etc/hosts` file. The data is persistant even after node reboots by storing the data in the `hostPath`.
+## Architecture
+
+The application is split across two namespaces:
+
+- **`frontend-api`** — the frontend and backend of the application together with all their dependencies.
+- **`database`** — Postgres with its dependencies and environment variables.
+
+## Accessing the service
+
+The service can be reached in two ways:
+
+- Via **NodePort**: `<node IP>:<service port>/books`
+- Via **Ingress**: the `ingress` object is mapped to the host `app.santoshdts`. If you use this host, remember to map it in your `/etc/hosts` file.
+
+Data is persisted even after node reboots by storing it on a `hostPath` volume.
 
 ## TODO
 
@@ -22,4 +36,4 @@ The frontend and the backend of the application with all its dependencies are de
 - [ ] Add more functionality and styling to the Go Apllication.
 
 
-*If you somehow happen to pass by this repo and would like to make a suggestion, add some fuctionality to it or find something which is not handled appropriatly by me, please feel to file an issue or raise a PR. I would be happy to receive valuable inputs from you.
+*If you happen to pass by this repo and would like to make a suggestion, add some functionality to it, or find something that is not handled appropriately, please feel free to file an issue or raise a PR. I would be happy to receive valuable input from you.

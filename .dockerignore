@@ -1,0 +1,12 @@
+.git
+.env
+AGENTS.md
+plan.md
+*.png
+manifests/
+helm/
+kustomize/
+.github/
+actions/
+Dockerfile.xxx
+dockerize.sh

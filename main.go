@@ -4,27 +4,28 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
+	"strings"
 
+	_ "github.com/joho/godotenv/autoload"
 	_ "github.com/lib/pq"
 )
 
-const (
-	DB_USER = "santosh"
-	DB_PASS = "dts123"
-	DB_NAME = "bookstore"
-	// Change to Localhost if testing on local DB build-1
-	// DB_HOST = "localhost"
-	//for build-2 localhost is as below
-	DB_HOST  = "postgres-0.postgres.database.svc.cluster.local"
-	DB_PORT  = 5432
-	SSL_MODE = "disable"
-)
+func getEnv(key, fallback string) string {
+	if v, ok := os.LookupEnv(key); ok {
+		return v
+	}
+	return fallback
+}
 
-var db *sql.DB
-var tpl *template.Template
+var (
+	db  *sql.DB
+	tpl *template.Template
+)
 
 type Books struct {
 	Isbn   string
@@ -35,9 +36,22 @@ type Books struct {
 
 func main() {
 	var err error
-	// db, err = sql.Open("postgres", "postgres://santosh:dts123@postgres.database.svc.cluster.local:5432/bookstore?sslmode=disable")
-	args := fmt.Sprintf("host=%s port=%d dbname=%s user='%s' password=%s sslmode=%s", DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS, SSL_MODE)
-	db, err = sql.Open("postgres", args)
+	host := strings.TrimSpace(getEnv("POSTGRES_HOST", "localhost"))
+	// Handle misreading IPV6 like, ::1 to be interpreted as post:1
+	if _, _, err := net.SplitHostPort(host); err != nil {
+		host = net.JoinHostPort(host, getEnv("POSTGRES_PORT", "5432"))
+	}
+	u := url.URL{
+		Scheme: "postgres",
+		User:   url.UserPassword(getEnv("POSTGRES_USER", "santosh"), getEnv("POSTGRES_PASSWORD", "dts123")),
+		Host:   host,
+		Path:   getEnv("POSTGRES_DB", "bookstore"),
+	}
+	q := u.Query()
+	q.Set("sslmode", getEnv("POSTGRES_SSLMODE", "disable"))
+	u.RawQuery = q.Encode()
+
+	db, err = sql.Open("postgres", u.String())
 	if err != nil {
 		fmt.Printf("Connecting to the Database %s", err)
 	}
@@ -85,7 +99,6 @@ func index(w http.ResponseWriter, r *http.Request) {
 	tpl.ExecuteTemplate(w, "index.gohtml", data)
 
 	http.Redirect(w, r, "/books", http.StatusSeeOther)
-
 }
 
 func booksIndex(w http.ResponseWriter, r *http.Request) {
