@@ -11,7 +11,6 @@ RUN go mod download
 ARG COMMIT_SHA
 ENV COMMIT_SHA=$COMMIT_SHA
 COPY main.go ./
-COPY ./pkg ./pkg
 COPY ./templates ./templates
 COPY ./image ./image
 RUN go build -o bookstore -ldflags "-X main.commitSHA=$(COMMIT_SHA)"
@@ -24,8 +23,8 @@ FROM cgr.dev/chainguard/go:latest
 
 WORKDIR /app
 
-COPY --from=build /home/bookstore ./
-COPY --from=build /home/image ./image
-COPY --from=build /home/templates/. ./templates
+COPY --from=build /app/bookstore ./
+COPY --from=build /app/image ./image
+COPY --from=build /app/templates/. ./templates
 
 ENTRYPOINT ["./bookstore"]
